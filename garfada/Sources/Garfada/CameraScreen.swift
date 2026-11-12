@@ -58,7 +58,7 @@ struct CameraScreen: View {
 		}
 		.padding(.horizontal, 20)
 		.padding(.vertical, 10)
-		.background(.ultraThinMaterial.opacity(0.6))
+		.background(.ultraThinMaterial)
 	}
 
 	private var panel: some View {
