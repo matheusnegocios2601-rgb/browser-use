@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Garfada: um prato/bocado com uma mordida, um garfo e a mira da câmera. -->
+  <defs>
+    <mask id="bite">
+      <rect width="1024" height="1024" fill="#fff"/>
+      <circle cx="790" cy="330" r="118" fill="#000"/>
+      <circle cx="700" cy="232" r="84" fill="#000"/>
+      <circle cx="862" cy="452" r="84" fill="#000"/>
+    </mask>
+  </defs>
+  <rect width="1024" height="1024" fill="#14160F"/>
+  <!-- mira -->
+  <g fill="none" stroke="#D4F25A" stroke-width="44" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M150 290 V150 H290"/>
+    <path d="M734 150 H874 V290" opacity="0.35"/>
+    <path d="M150 734 V874 H290"/>
+    <path d="M874 734 V874 H734"/>
+  </g>
+  <!-- bocado com mordida -->
+  <circle cx="500" cy="540" r="300" fill="#FF5A36" mask="url(#bite)"/>
+  <!-- garfo -->
+  <g fill="#F6EFE3">
+    <rect x="398" y="350" width="40" height="190" rx="20"/>
+    <rect x="480" y="330" width="40" height="210" rx="20"/>
+    <rect x="562" y="350" width="40" height="190" rx="20"/>
+    <path d="M398 520 H602 V540 C602 602 560 640 520 652 V756 A20 20 0 0 1 480 756 V652 C440 640 398 602 398 540 Z"/>
+  </g>
+</svg>
