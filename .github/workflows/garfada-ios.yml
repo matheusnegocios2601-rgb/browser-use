@@ -1,0 +1,29 @@
+name: garfada-ios
+
+on:
+  push:
+    paths:
+      - 'garfada/**'
+      - '.github/workflows/garfada-ios.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: garfada
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode
+        run: |
+          sudo xcode-select -s "$(ls -d /Applications/Xcode_16*.app | sort -V | tail -1)"
+          xcodebuild -version
+      - name: Testes da lógica (TACO, porções, saúde)
+        run: swift test
+      - name: Compilar o app para iPhone (sem assinatura)
+        run: |
+          set -o pipefail
+          xcodebuild -scheme Garfada -destination 'generic/platform=iOS' \
+            -derivedDataPath build CODE_SIGNING_ALLOWED=NO build 2>&1 | tee build.log | grep -E "error:|warning:|BUILD" || true
+          grep -q "BUILD SUCCEEDED" build.log
