@@ -1,0 +1,18 @@
+[project]
+name = "voznav"
+version = "0.1.0"
+description = "Navegador pessoal por voz para Windows (pt-BR)"
+requires-python = ">=3.11"
+dependencies = ["faster-whisper>=1.1", "sounddevice>=0.5", "numpy>=1.26", "pynput>=1.7.7"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "piper-tts>=1.3", "soundfile>=0.12"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 160
+[tool.ruff.format]
+indent-style = "tab"
+quote-style = "single"

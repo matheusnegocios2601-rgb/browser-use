@@ -1,0 +1,5 @@
+.venv/
+__pycache__/
+*.pyc
+erro.log
+.pytest_cache/
