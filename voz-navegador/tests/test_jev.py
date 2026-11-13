@@ -92,3 +92,14 @@ def test_desligado_por_padrao_e_sessao_usa_so_quando_ha_empate(servidor, dados, 
 	assert (d.tipo, d.via, d.rotulo) == ('abrir', 'jev', 'Banco Inter') and len(servidor['pedidos']) == 1
 	servidor['resposta'] = _resposta('nenhum', 0.9, {'nenhum': 0.9, 'op1': 0.05, 'op2': 0.05})
 	assert s.processar('abre meu banco').tipo == 'escolher'  # Jev em dúvida: pergunta como sempre
+
+
+def test_frase_nao_reconhecida_vai_ao_jev_antes_de_pedir_para_repetir(servidor, dados):
+	s = Sessao(dados, desempate=Jev('k', url=servidor['url']).escolher)
+	servidor['resposta'] = _resposta('nenhum', 0.9, {'nenhum': 0.95})
+	assert s.processar('abenifix').tipo == 'repetir'
+	criterios = servidor['pedidos'][-1][1]['questions']['destino']['criteria']
+	netflix = next(k for k, v in criterios.items() if v.startswith('Netflix'))
+	servidor['resposta'] = _resposta(netflix, 0.92, {netflix: 0.9, 'nenhum': 0.1})
+	d = s.processar('abenifix')
+	assert (d.tipo, d.via, d.url) == ('abrir', 'jev', 'https://www.netflix.com/')

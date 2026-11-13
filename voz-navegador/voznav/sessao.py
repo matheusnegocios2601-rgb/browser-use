@@ -331,8 +331,10 @@ class Sessao:
 		if len(colados) == 1:
 			return self._abriu(Decisao('abrir', url=colados[0].url, rotulo=colados[0].nome, via='nome_aproximado'), colados[0].nome, colados[0])
 
-		if self.desempate and self.dados.atalhos and len(alvo) >= 3:
-			escolhido = self.desempate(frase, self.dados.atalhos[:40])
+		if self.desempate and len(junto) >= 4:
+			# Nada reconhecido pelas regras locais: antes de pedir para repetir, pergunta ao Jev (se ligado) qual
+			# atalho ou serviço a frase quer dizer. Ele tem a opção "nenhum" e só vale com folga.
+			escolhido = self.desempate(frase, self.dados.catalogo()[:120])
 			if escolhido:
 				return self._abriu(Decisao('abrir', url=escolhido.url, rotulo=escolhido.nome, via='jev'), escolhido.nome, escolhido)
 

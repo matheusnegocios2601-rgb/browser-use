@@ -54,8 +54,8 @@ class App:
 
 		self.raiz = tk.Tk()
 		self.raiz.title('Navegador por Voz')
-		self.raiz.geometry('640x720')
-		self.raiz.minsize(540, 560)
+		self.raiz.minsize(440, 0)  # sem altura fixa: a janela cresce quando aparece um painel extra
+		self.raiz.resizable(False, False)
 		self.raiz.protocol('WM_DELETE_WINDOW', self.fechar)
 		self._montar_janela()
 		self._montar_sobreposicao()
@@ -123,7 +123,7 @@ class App:
 			self.motor.pausar()
 		self.captura.parar()
 		self.rotulo_erro.config(text=f'{erro.causa}\n{erro.acao}')
-		self.quadro_erro.pack(fill='x', padx=12, pady=(0, 8), after=self.quadro_estado)
+		self.quadro_erro.pack(fill='x', padx=14, pady=(0, 8), after=self.quadro_estado)
 		self._mostrar_estado('erro', erro.causa)
 
 	def _tentar_de_novo(self) -> None:
@@ -255,9 +255,7 @@ class App:
 			self._listar_atalhos()
 			self.rec.definir_vocabulario(self.dados.vocabulario())  # o nome novo já vale nesta sessão
 		if d.tipo == 'config':
-			self.raiz.deiconify()
-			self.raiz.lift()
-			self.abas.select(1)
+			self._abrir_ajustes(0)
 		if self.calibrando is not None:
 			self._calibracao_avanca(d)
 
@@ -324,57 +322,73 @@ class App:
 	# ------------------------------------------------------------------------------------------------
 
 	def _montar_janela(self) -> None:
+		"""Tela principal: estado, um botão, a última frase e um campo. O resto fica em Ajustes."""
 		self.var_estado, self.var_msg, self.var_frase = tk.StringVar(), tk.StringVar(), tk.StringVar()
-		self.abas = ttk.Notebook(self.raiz)
-		self.abas.pack(fill='both', expand=True)
-		inicio, atalhos, buscas, opcoes, medicoes = (ttk.Frame(self.abas) for _ in range(5))
-		for quadro, nome in ((inicio, 'Início'), (atalhos, 'Atalhos'), (buscas, 'Buscas'), (opcoes, 'Opções'), (medicoes, 'Medições')):
-			self.abas.add(quadro, text=nome)
-		self._aba_inicio(inicio)
-		self._aba_atalhos(atalhos)
-		self._aba_buscas(buscas)
-		self._aba_opcoes(opcoes)
-		self._aba_medicoes(medicoes)
+		f = ttk.Frame(self.raiz)
+		f.pack(fill='both', expand=True)
 
-	def _aba_inicio(self, f: ttk.Frame) -> None:
 		q = ttk.Frame(f)
-		q.pack(fill='x', padx=12, pady=10)
+		q.pack(fill='x', padx=14, pady=(14, 6))
 		self.quadro_estado = q
-		self.rotulo_estado = ttk.Label(q, textvariable=self.var_estado, font=('Segoe UI', 18, 'bold'))
+		self.rotulo_estado = ttk.Label(q, textvariable=self.var_estado, font=('Segoe UI', 20, 'bold'))
 		self.rotulo_estado.pack(side='left')
-		self.botao_ouvir = ttk.Button(q, text='Ouvir', command=self.ouvir)
+		self.botao_ouvir = ttk.Button(q, text='Ouvir', command=self.ouvir, width=10)
 		self.botao_ouvir.pack(side='right')
 
+		# aparecem só quando são necessários
 		self.quadro_erro = ttk.Frame(f)
-		self.rotulo_erro = ttk.Label(self.quadro_erro, foreground='#e03131', wraplength=540, justify='left')
+		self.rotulo_erro = ttk.Label(self.quadro_erro, foreground='#e03131', wraplength=400, justify='left')
 		self.rotulo_erro.pack(anchor='w')
 		ttk.Button(self.quadro_erro, text='Tentar de novo', command=self._tentar_de_novo).pack(anchor='w', pady=4)
-
 		self.quadro_escolha = ttk.Frame(f)
-		self.quadro_confirma = ttk.LabelFrame(f, text='Novo atalho: confira e corrija antes de salvar')
+		self.quadro_confirma = ttk.LabelFrame(f, text='Novo atalho: confira antes de salvar')
 		self.var_cnome, self.var_curl = tk.StringVar(), tk.StringVar()
 		for i, (rot, var) in enumerate((('Nome', self.var_cnome), ('Endereço', self.var_curl))):
 			ttk.Label(self.quadro_confirma, text=rot).grid(row=i, column=0, sticky='w', padx=6, pady=3)
-			ttk.Entry(self.quadro_confirma, textvariable=var, width=40).grid(row=i, column=1, sticky='we', padx=6, pady=3)
+			ttk.Entry(self.quadro_confirma, textvariable=var, width=34).grid(row=i, column=1, sticky='we', padx=6, pady=3)
 		self.quadro_confirma.columnconfigure(1, weight=1)
 		b = ttk.Frame(self.quadro_confirma)
 		b.grid(row=2, column=1, sticky='e', padx=6, pady=4)
 		ttk.Button(b, text='Salvar', command=lambda: self._decisao(self.sessao.confirmar_atalho(self.var_cnome.get(), self.var_curl.get()))).pack(side='left', padx=3)
 		ttk.Button(b, text='Cancelar', command=lambda: self.motor.cancelar()).pack(side='left')
 
-		ttk.Label(f, text='Última frase reconhecida:').pack(anchor='w', padx=12)
-		ttk.Label(f, textvariable=self.var_frase, font=('Segoe UI', 11, 'italic'), wraplength=560).pack(anchor='w', padx=12, pady=(0, 6))
-		ttk.Label(f, textvariable=self.var_msg, wraplength=560, justify='left').pack(anchor='w', padx=12, pady=(0, 10))
+		ttk.Label(f, textvariable=self.var_frase, font=('Segoe UI', 11, 'italic'), wraplength=400).pack(anchor='w', padx=14, pady=(6, 2))
+		ttk.Label(f, textvariable=self.var_msg, wraplength=400, justify='left').pack(anchor='w', padx=14, pady=(0, 8))
 
-		q = ttk.LabelFrame(f, text='Digitar um comando ou colar um endereço')
-		q.pack(fill='x', padx=12, pady=6)
-		self.entrada = ttk.Entry(q)
-		self.entrada.pack(side='left', fill='x', expand=True, padx=6, pady=6)
+		self.entrada = ttk.Entry(f)
+		self.entrada.pack(fill='x', padx=14, pady=(4, 2))
 		self.entrada.bind('<Return>', self._enviar_texto)
-		ttk.Button(q, text='Enviar', command=self._enviar_texto).pack(side='left', padx=6)
+		ttk.Label(f, text='Fale, ou digite aqui e aperte Enter. Ex.: "abre o YouTube" · "criar atalho painel"', foreground='#6b7280', wraplength=400).pack(anchor='w', padx=14)
 
+		rodape = ttk.Frame(f)
+		rodape.pack(fill='x', side='bottom', padx=14, pady=10)
+		ttk.Button(rodape, text='Ajustes', command=self._abrir_ajustes).pack(side='right')
+
+		# janela de ajustes: criada escondida, mostrada pelo botão
+		self.janela_ajustes = tk.Toplevel(self.raiz)
+		self.janela_ajustes.title('Ajustes — Navegador por Voz')
+		self.janela_ajustes.geometry('640x640')
+		self.janela_ajustes.withdraw()
+		self.janela_ajustes.protocol('WM_DELETE_WINDOW', self.janela_ajustes.withdraw)
+		self.abas = ttk.Notebook(self.janela_ajustes)
+		self.abas.pack(fill='both', expand=True)
+		atalhos, geral, buscas, avancado, medicoes = (ttk.Frame(self.abas) for _ in range(5))
+		for quadro, nome in ((atalhos, 'Atalhos'), (geral, 'Geral'), (buscas, 'Buscas'), (avancado, 'Avançado'), (medicoes, 'Medições')):
+			self.abas.add(quadro, text=nome)
+		self._aba_atalhos(atalhos)
+		self._aba_geral(geral)
+		self._aba_buscas(buscas)
+		self._aba_opcoes(avancado)
+		self._aba_medicoes(medicoes)
+
+	def _abrir_ajustes(self, aba: int = 0) -> None:
+		self.janela_ajustes.deiconify()
+		self.janela_ajustes.lift()
+		self.abas.select(aba)
+
+	def _aba_geral(self, f: ttk.Frame) -> None:
 		q = ttk.LabelFrame(f, text='Como escutar')
-		q.pack(fill='x', padx=12, pady=6)
+		q.pack(fill='x', padx=12, pady=10)
 		self.var_modo = tk.StringVar(value=self.dados.config.modo)
 		ttk.Radiobutton(q, text='Mãos livres: fico ouvindo e você fala quando quiser', value='maos_livres', variable=self.var_modo, command=self._mudar_modo).pack(anchor='w', padx=6)
 		ttk.Radiobutton(q, text='Pressionar para falar: segure a tecla, fale, solte', value='ptt', variable=self.var_modo, command=self._mudar_modo).pack(anchor='w', padx=6)
@@ -383,14 +397,39 @@ class App:
 
 		q = ttk.LabelFrame(f, text='Microfone')
 		q.pack(fill='x', padx=12, pady=6)
-		self.combo_mic = ttk.Combobox(q, state='readonly')
+		self.combo_mic = ttk.Combobox(q, state='readonly', postcommand=lambda: self._atualizar_microfones(True))
 		self.combo_mic.pack(side='left', fill='x', expand=True, padx=6, pady=6)
 		self.combo_mic.bind('<<ComboboxSelected>>', self._escolher_microfone)
-		ttk.Button(q, text='Atualizar lista', command=lambda: self._atualizar_microfones(True)).pack(side='left', padx=3)
-		ttk.Button(q, text='Testar nível', command=self._testar_microfone).pack(side='left', padx=3)
+		ttk.Button(q, text='Testar', command=self._testar_microfone).pack(side='left', padx=6)
 		self.barra_nivel = ttk.Progressbar(f, maximum=100)
 		self.barra_nivel.pack(fill='x', padx=12, pady=(0, 8))
 		self._atualizar_microfones()
+
+		q = ttk.LabelFrame(f, text='Jev (TypeSafe AI) — opcional')
+		q.pack(fill='x', padx=12, pady=10)
+		self.var_chave = tk.StringVar(value=self.dados.config.jev_chave)
+		ttk.Label(q, text='Chave da API:').pack(side='left', padx=6, pady=6)
+		campo = ttk.Entry(q, textvariable=self.var_chave, show='•')
+		campo.pack(side='left', fill='x', expand=True, padx=6, pady=6)
+		for evento in ('<Return>', '<FocusOut>'):
+			campo.bind(evento, self._salvar_chave_jev)
+		ttk.Label(
+			f, wraplength=590, justify='left', foreground='#6b7280',
+			text='Com a chave preenchida, o Jev é consultado quando o app não reconhece o que você pediu, para tentar acertar o destino '
+			'sem você repetir. Precisa de internet e envia à TypeSafe a frase dita e os nomes dos seus atalhos e serviços. '
+			'Os comandos que o app já entende não passam por ele. Campo vazio = desligado.',
+		).pack(anchor='w', padx=12)
+
+	def _salvar_chave_jev(self, *_) -> None:
+		c = self.dados.config
+		chave = self.var_chave.get().strip()
+		if chave == c.jev_chave and c.jev_ativo == bool(chave):
+			return
+		c.jev_chave, c.jev_ativo = chave, bool(chave)
+		self.dados.salvar()
+		if self.sessao:
+			self.sessao.desempate = criar_desempate(c)
+		self.var_msg.set('Jev ligado.' if chave else 'Jev desligado.')
 
 	def _atualizar_microfones(self, reiniciar: bool = False) -> None:
 		try:
@@ -440,8 +479,7 @@ class App:
 		q.columnconfigure(1, weight=1)
 		b = ttk.Frame(f)
 		b.pack(fill='x', padx=12, pady=10)
-		ttk.Button(b, text='Novo', command=lambda: [e.delete(0, 'end') for e in self.campos_atalho.values()]).pack(side='left')
-		ttk.Button(b, text='Salvar', command=self._salvar_atalho).pack(side='left', padx=6)
+		ttk.Button(b, text='Salvar', command=self._salvar_atalho).pack(side='left', padx=(0, 6))
 		ttk.Button(b, text='Remover', command=self._remover_atalho).pack(side='left')
 		ttk.Label(f, text='Por voz: diga "criar atalho" e o nome; depois dite ou cole o endereço e diga "salvar".', wraplength=560).pack(anchor='w', padx=12, pady=(0, 10))
 		self._listar_atalhos()
@@ -475,6 +513,8 @@ class App:
 			messagebox.showerror('Atalho', str(erro))
 			return
 		self._listar_atalhos()
+		for e in self.campos_atalho.values():
+			e.delete(0, 'end')  # pronto para cadastrar o próximo
 		if hasattr(self, 'rec'):
 			self.rec.definir_vocabulario(self.dados.vocabulario())
 
@@ -584,19 +624,12 @@ class App:
 		self.texto_pron.insert('1.0', '\n'.join(f'{k} = {v}' for k, v in c.pronuncias.items()))
 		self.texto_pron.pack(fill='x', padx=6, pady=6)
 
-		q = ttk.LabelFrame(f, text='Jev (TypeSafe AI): desempate opcional em nuvem')
-		q.pack(fill='x', padx=12, pady=8)
-		self.var_jev, self.var_chave = tk.BooleanVar(value=c.jev_ativo), tk.StringVar(value=c.jev_chave)
-		ttk.Checkbutton(q, text='Usar o Jev quando houver dúvida entre atalhos', variable=self.var_jev).pack(anchor='w', padx=6)
-		ttk.Label(q, text='Chave da API:').pack(side='left', padx=6, pady=4)
-		ttk.Entry(q, textvariable=self.var_chave, show='•', width=40).pack(side='left', pady=4)
-		ttk.Label(f, text='O Jev exige conta e internet e recebe a frase dita e os nomes dos atalhos em dúvida. Os comandos comuns nunca passam por ele.', wraplength=560, justify='left').pack(anchor='w', padx=12)
 		ttk.Button(f, text='Salvar opções', command=self._salvar_opcoes).pack(anchor='e', padx=12, pady=8)
 
 	def _salvar_opcoes(self) -> None:
 		c = self.dados.config
 		c.modelo, c.fim_fala_ms, c.espera_extensao_ms = self.var_modelo.get(), self.var_fim.get(), self.var_tol.get()
-		c.som, c.diagnostico, c.jev_ativo, c.jev_chave = self.var_som.get(), self.var_diag.get(), self.var_jev.get(), self.var_chave.get().strip()
+		c.som, c.diagnostico = self.var_som.get(), self.var_diag.get()
 		pron = {}
 		for linha in self.texto_pron.get('1.0', 'end').splitlines():
 			if '=' in linha:
@@ -605,8 +638,6 @@ class App:
 					pron[fala] = escrita
 		c.pronuncias = pron
 		self.dados.salvar()
-		if self.sessao:
-			self.sessao.desempate = criar_desempate(c)
 		self.var_msg.set('Opções salvas.')
 
 	def _apagar_diagnostico(self) -> None:
@@ -651,7 +682,7 @@ class App:
 
 	def _calibrar(self) -> None:
 		if not self.motor or self.estado in ('pausado', 'erro', 'carregando'):
-			messagebox.showinfo('Calibração', 'Clique em Ouvir primeiro (o microfone precisa estar funcionando).')
+			messagebox.showinfo('Calibração', 'Clique em Ouvir na tela principal primeiro (o microfone precisa estar funcionando).')
 			return
 		self.calibrando, self._cal_url = [], ''
 		self._cal_n = len(self.motor.metricas.medidas)
@@ -693,8 +724,8 @@ class App:
 			linhas.append('Passou de 1 s: em Opções, experimente o modelo "base", ou use pressionar para falar (não espera silêncio).')
 		self.texto_med.delete('1.0', 'end')
 		self.texto_med.insert('1.0', '\n'.join(linhas))
-		self.var_msg.set('Calibração concluída: veja a aba Medições.')
-		self.abas.select(4)
+		self.var_msg.set('Calibração concluída: veja Ajustes → Medições.')
+		self._abrir_ajustes(4)
 
 	def executar(self) -> None:
 		self.raiz.mainloop()

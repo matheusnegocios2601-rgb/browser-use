@@ -2,8 +2,8 @@
 
 O Jev é um classificador em nuvem (70-500 ms por chamada, segundo a TypeSafe). Ele NÃO acelera o caminho
 comum: abrir favorito, pesquisar e endereço ditado são resolvidos localmente em ~1 ms e nunca passam por aqui.
-Só é consultado quando a alternativa seria perguntar "qual dos dois?" ou não achar nada para uma descrição
-longa. Fica desligado por padrão; ligado, envia à TypeSafe a frase dita e nome/descrição/domínio dos atalhos
+Só é consultado quando a alternativa seria perguntar "qual dos dois?" ou pedir para repetir porque nada foi
+reconhecido. Fica desligado por padrão; ligado, envia à TypeSafe a frase dita e nome/descrição/domínio dos atalhos
 candidatos (nunca a URL completa, áudio ou histórico).
 """
 
@@ -24,14 +24,14 @@ class Jev:
 
 	def escolher(self, frase: str, candidatos: list[Entrada]) -> Entrada | None:
 		"""Devolve um candidato só se a resposta for folgada; qualquer dúvida, erro ou demora devolve None."""
-		opcoes = {f'op{i + 1}': e for i, e in enumerate(candidatos[:40])}
+		opcoes = {f'op{i + 1}': e for i, e in enumerate(candidatos[:120])}
 		criterios = {k: ' — '.join(p for p in (e.nome, ', '.join(e.apelidos), e.descricao, urlsplit(e.url).hostname or '') if p) for k, e in opcoes.items()}
 		# O Jev sempre escolhe alguma opção; sem esta saída explícita ele forçaria um atalho mesmo sem evidência.
 		criterios['nenhum'] = 'Nenhum atalho corresponde claramente ao que foi dito, ou mais de um é igualmente plausível'
 		corpo = {
 			'model': self.modelo,
 			'state': f'Pedido falado a um navegador por voz, em português do Brasil: "{frase}"',
-			'questions': {'destino': {'type': 'choice', 'instructions': 'Qual atalho salvo o usuário quer abrir', 'criteria': criterios}},
+			'questions': {'destino': {'type': 'choice', 'instructions': 'Qual destino o usuário quer abrir. A frase veio de reconhecimento de voz e pode ter erros de grafia', 'criteria': criterios}},
 		}
 		pedido = urllib.request.Request(
 			self.url, data=json.dumps(corpo).encode('utf-8'), method='POST',

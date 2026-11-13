@@ -37,7 +37,7 @@ Por voz:
 4. Diga **"salvar"**.
 5. Diga **"abre meu painel de vendas"**. Continua valendo depois de fechar e reabrir o app.
 
-Pela janela: aba **Atalhos**. Cada atalho tem nome, endereço completo, outras formas de falar e uma descrição. A descrição permite pedidos como "aquela página que eu salvei pra acompanhar vendas".
+Pela janela: botão **Ajustes** → aba **Atalhos**. Cada atalho tem nome, endereço completo, outras formas de falar e uma descrição. A descrição permite pedidos como "aquela página que eu salvei pra acompanhar vendas".
 
 Se o app não entender um nome e você corrigir do mesmo jeito duas vezes, ele oferece guardar aquela pronúncia como apelido. Só guarda se você disser "sim".
 
@@ -49,33 +49,33 @@ Se o app não entender um nome e você corrigir do mesmo jeito duas vezes, ele o
 ## Dois modos
 
 - **Mãos livres** (padrão): fica ouvindo; cada frase termina com ~0,5 s de silêncio.
-- **Pressionar para falar**: segure a tecla (padrão: **Ctrl direito**), fale, solte. Soltar conclui o pedido na hora. Funciona com outro programa em primeiro plano. Para trocar a tecla: aba Início → botão "Tecla: … (trocar)".
+- **Pressionar para falar**: segure a tecla (padrão: **Ctrl direito**), fale, solte. Soltar conclui o pedido na hora. Funciona com outro programa em primeiro plano. Para trocar de modo ou de tecla: **Ajustes → Geral**.
 
 Estados na barrinha: **Pausado** (cinza) · **Ouvindo** (verde) · **Pronto** (azul, aguardando a tecla) · **Interpretando** (amarelo) · **Aguardando escolha** (roxo) · **Problema no microfone** (vermelho, com a causa e o que fazer).
 
 ## Avisos honestos
 
 - **Mãos livres ouve tudo.** Um vídeo tocando nas caixas de som pode ser entendido como comando. Com som ambiente, use fone de ouvido ou o modo pressionar para falar.
-- **"YouTube" sozinho demora ~0,4 s a mais de propósito**: o app espera para ver se vem "Music". Ajuste em Opções → "Tolerância extra a pausa". No modo pressionar para falar essa espera não existe.
+- **"YouTube" sozinho demora ~0,4 s a mais de propósito**: o app espera para ver se vem "Music". Ajuste em Ajustes → Avançado → "Tolerância extra a pausa". No modo pressionar para falar essa espera não existe.
 - O detector de fala é por volume. Em ambiente barulhento ele pode não perceber o fim da frase; nesse caso prefira pressionar para falar.
 
 ## Privacidade
 
 - O áudio fica só na memória e é descartado depois de cada frase. Nenhuma transcrição é guardada.
 - Reconhecimento e interpretação rodam no seu PC, sem conta.
-- **Diagnóstico** (Opções) vem desligado. Ligado, grava em `%APPDATA%\VozNavegador\diagnostico.jsonl` a frase reconhecida, a decisão e o destino (nunca áudio). Há um botão para apagar.
+- **Diagnóstico** (Ajustes → Avançado) vem desligado. Ligado, grava em `%APPDATA%\VozNavegador\diagnostico.jsonl` a frase reconhecida, a decisão e o destino (nunca áudio). Há um botão para apagar.
 - O app abre URLs pelo mecanismo padrão do Windows. Não usa depuração remota, não lê cookies nem senhas. Só abre `http://` e `https://`.
 - Seus atalhos e preferências ficam em `%APPDATA%\VozNavegador\dados.json`.
 
 ## Jev (TypeSafe AI)
 
-Está integrado como **opcional e desligado**. O Jev é um classificador em nuvem que responde em 70–500 ms; as regras locais deste app decidem em ~2 ms. Por isso ele **não acelera** os comandos comuns e não é chamado neles. Ele só entra quando o app ficaria em dúvida entre atalhos (em vez de perguntar "qual dos dois?"). Para usar: Opções → marque "Usar o Jev" e cole a chave da API (o acesso é por lista de espera em typesafe.ai). Ligado, ele recebe a frase dita e o nome/descrição/domínio dos atalhos em dúvida.
+Opcional. Em **Ajustes → Geral**, cole a chave da API no campo "Chave da API" e aperte Enter. Campo vazio = desligado.
 
-Não foi possível testar contra o serviço real (sem chave); foi testado contra um servidor local que imita o formato documentado da API.
+O Jev é um classificador em nuvem que responde em 70–500 ms; as regras locais deste app decidem em ~2 ms. Ele **não deixa os comandos comuns mais rápidos** e não é chamado neles. Ele entra em dois casos: quando o app ficaria em dúvida entre dois atalhos, e quando o app não reconheceu o que você pediu. Nesses casos ele tenta acertar o destino para você não precisar repetir. Precisa de internet e recebe a frase dita e os nomes dos seus atalhos e serviços.
 
 ## Medições
 
-Para medir no **seu** PC, com a **sua** voz: aba **Medições → Calibração guiada** (8 frases, ~1 minuto, não abre nada). Esses são os números que valem para você.
+Para medir no **seu** PC, com a **sua** voz: **Ajustes → Medições → Calibração guiada** (8 frases, ~1 minuto, não abre nada). Esses são os números que valem para você.
 
 O que foi medido no desenvolvimento (máquina Linux de 4 núcleos, sem microfone; **nada disto é voz humana nem Windows**):
 
@@ -97,7 +97,7 @@ O que foi medido no desenvolvimento (máquina Linux de 4 núcleos, sem microfone
 
 Os cenários incluem silêncio, ruído constante, estalos, pausa no meio do nome, consulta contendo nome de serviço, correção depois de erro, cancelamento, repetição intencional e dois comandos em sequência. Os erros se concentram em nomes em inglês lidos por voz sintética ("github ponto com barra settings") e isso pode ser melhor ou pior com a sua voz. Os números variam um pouco a cada execução.
 
-**Testes de texto e do motor** (96 testes automáticos): regras de interpretação, URLs, persistência dos atalhos, uma abertura por fala, descarte de resultados atrasados, falha de microfone.
+**Testes de texto e do motor** (97 testes automáticos): regras de interpretação, URLs, persistência dos atalhos, uma abertura por fala, descarte de resultados atrasados, falha de microfone.
 
 **Depende de você** (não pude verificar): o lançador `.bat`, a tecla global, a barrinha sem roubar foco, o microfone e a abertura real no navegador do Windows.
 
