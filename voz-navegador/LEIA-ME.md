@@ -75,7 +75,33 @@ Não foi possível testar contra o serviço real (sem chave); foi testado contra
 
 ## Medições
 
-Veja `MEDICOES.md` para os números obtidos e como foram medidos. Para medir no **seu** PC, com a **sua** voz: aba **Medições → Calibração guiada** (8 frases, ~1 minuto, não abre nada).
+Para medir no **seu** PC, com a **sua** voz: aba **Medições → Calibração guiada** (8 frases, ~1 minuto, não abre nada). Esses são os números que valem para você.
+
+O que foi medido no desenvolvimento (máquina Linux de 4 núcleos, sem microfone; **nada disto é voz humana nem Windows**):
+
+**Áudio sintetizado** (3 vozes Piper pt-BR, reproduzido no ritmo real, fim de fala conhecido, 25 cenários por voz, aberturas interceptadas), modelo `small`:
+
+| | Resultado |
+|---|---|
+| Fim da fala → URL despachada (n=56 aberturas) | mediana 637 ms · p95 1034 ms · **52 de 56 (93%) em até 1 s** |
+| Meta de 95% em até 1 s | **não atingida** nessa máquina (faltaram 2 pontos) |
+| fim da fala → transcrição final (inclui espera por silêncio) | mediana 621 ms · p95 1030 ms |
+| transcrição final → escolha do destino | mediana 2 ms · p95 7 ms |
+| escolha do destino → despacho | ~0 ms (abertura interceptada; no Windows real não foi medido) |
+| Inicialização até pronto (modelo já baixado) | 1,4 s |
+| Cenários certos de primeira, 2 vozes inteligíveis | 46 de 50 |
+| Cenários certos de primeira, 3 vozes | 61 de 75 (a terceira voz sintética é mal compreendida até em "meu painel") |
+| Aberturas: esperadas / feitas / destino certo / erradas | 66 / 56 / 51 / 5 |
+| Pedidos de repetição | 20 |
+| Aberturas duplicadas | 0 |
+
+Os cenários incluem silêncio, ruído constante, estalos, pausa no meio do nome, consulta contendo nome de serviço, correção depois de erro, cancelamento, repetição intencional e dois comandos em sequência. Os erros se concentram em nomes em inglês lidos por voz sintética ("github ponto com barra settings") e isso pode ser melhor ou pior com a sua voz. Os números variam um pouco a cada execução.
+
+**Testes de texto e do motor** (96 testes automáticos): regras de interpretação, URLs, persistência dos atalhos, uma abertura por fala, descarte de resultados atrasados, falha de microfone.
+
+**Depende de você** (não pude verificar): o lançador `.bat`, a tecla global, a barrinha sem roubar foco, o microfone e a abertura real no navegador do Windows.
+
+Repetir a bancada: `python ferramentas/bancada_audio.py --vozes PASTA_COM_VOZES_PIPER --modelos PASTA_DOS_MODELOS`.
 
 ## Para mexer no projeto
 

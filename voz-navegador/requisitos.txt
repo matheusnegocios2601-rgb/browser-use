@@ -1,0 +1,4 @@
+faster-whisper>=1.1,<2
+sounddevice>=0.5
+numpy>=1.26
+pynput>=1.7.7
